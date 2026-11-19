@@ -134,7 +134,7 @@ export default function QuestionEditor({ question }: { question?: any }) {
               required
             >
               <option value="">-- Pilih jawaban benar --</option>
-              {optionList.map((option, index) => (
+              {optionList.map((option: string, index: number) => (
                 <option key={index} value={option}>
                   {option}
                 </option>
