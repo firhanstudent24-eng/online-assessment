@@ -1,0 +1,2 @@
+import {NextRequest,NextResponse} from "next/server";import {isAdmin} from "@/lib/auth";import {db} from "@/lib/supabase";
+export async function POST(req:NextRequest){if(!(await isAdmin()))return NextResponse.json({error:"Unauthorized"},{status:401});const b=await req.json();const {error}=await db().from("settings").upsert({id:1,title:b.title,description:b.description});return NextResponse.json(error?{error:error.message}:{ok:true},{status:error?400:200});}
