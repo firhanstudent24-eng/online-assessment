@@ -9,6 +9,7 @@ export async function POST() {
     new URL(
       "/admin/login",
       process.env.SITE_URL || "http://localhost:3000"
-    )
+    ),
+    { status: 303 }
   );
 }
