@@ -61,10 +61,14 @@ export async function POST(req: NextRequest) {
       required: !!b.required,
     });
 
-  return NextResponse.json(
-    error ? { error: error.message } : { ok: true },
-    { status: error ? 400 : 200 }
-  );
+  if (error) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: 400 }
+    );
+  }
+
+  return NextResponse.json({ ok: true });
 }
 
 export async function PUT(req: NextRequest) {
@@ -114,7 +118,7 @@ export async function PUT(req: NextRequest) {
     }
   }
 
-  const { error } = await db()
+  const { data, error } = await db()
     .from("questions")
     .update({
       prompt: b.prompt.trim(),
@@ -128,12 +132,27 @@ export async function PUT(req: NextRequest) {
       active: !!b.active,
       required: !!b.required,
     })
-    .eq("id", b.id);
+    .eq("id", b.id)
+    .select("id")
+    .maybeSingle();
 
-  return NextResponse.json(
-    error ? { error: error.message } : { ok: true },
-    { status: error ? 400 : 200 }
-  );
+  if (error) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: 400 }
+    );
+  }
+
+  if (!data) {
+    return NextResponse.json(
+      {
+        error: "Soal tidak ditemukan. ID soal tidak cocok dengan database."
+      },
+      { status: 404 }
+    );
+  }
+
+  return NextResponse.json({ ok: true });
 }
 
 export async function DELETE(req: NextRequest) {
@@ -146,13 +165,24 @@ export async function DELETE(req: NextRequest) {
 
   const id = req.nextUrl.searchParams.get("id");
 
+  if (!id) {
+    return NextResponse.json(
+      { error: "ID soal wajib diisi." },
+      { status: 400 }
+    );
+  }
+
   const { error } = await db()
     .from("questions")
     .delete()
     .eq("id", id);
 
-  return NextResponse.json(
-    error ? { error: error.message } : { ok: true },
-    { status: error ? 400 : 200 }
-  );
+  if (error) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: 400 }
+    );
+  }
+
+  return NextResponse.json({ ok: true });
 }
